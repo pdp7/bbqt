@@ -1,7 +1,7 @@
 import serial
 import time
-serial = serial.Serial("/dev/ttyUSB1", baudrate=9600)
+serial = serial.Serial("/dev/ttyUSB0", baudrate=115200)
 
 while True:
-        serial.write("foo")
-        time.sleep(10)
+        serial.write('foo\n')
+        time.sleep(2)

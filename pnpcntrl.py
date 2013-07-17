@@ -16,47 +16,27 @@ from PyQt4 import QtGui, QtCore
 import sys
 import serial
 import time
+from time import sleep
 
-serial = serial.Serial("/dev/ttyUSB1", baudrate=9600)
+serial = serial.Serial("/dev/ttyUSB0", baudrate=115200, xonxoff=False, timeout=1)
 
 # check out this QT serial library http://qt-project.org/wiki/QtSerialPort
 # in leiu of serial port, redirect stdout  to file, then send file with comms program:
 #  ~$ python ./event3.py >gcd.gcd
 
-
-# LogFileName = None             # "print" Does not work inside of Python's IDLE
-LogFileName = "stdout"         # a clue.. ..sys.stdout.write() does not work either
-
-LogFileName = "Log.txt"      # Works inside with IDLE
-
-
-# print "LogFileName: %s" % ( LogFileName )
-# print "LogFileName: %s" % ( LogFileName )
-
 # set origin offset
-print 'g92 x0 y0'
-
+print "g92 x0 y0 \n"
+serial.write("g92 x0 y0 \n")
+print serial.readlines(None)
 # feedrate speed
-print 'f10000'
+print "f10000 \r\n"
+serial.write("f10000 \r\n")
+print serial.readlines(None)
 
 # drive motors to 0, 0
-print 'g0 x0 y0'
-
-#-------
-
-def Log_String( String, InitFile=False ) :
-    if(   LogFileName == None )     :  print String
-
-    elif( LogFileName == "stdout" ) :  sys.stdout.write( String )
-
-    else :
-        LogFile = open( "Log.txt", 'w' if(InitFile) else 'a' )
-        LogFile.write( String + '\n' )
-        LogFile.close()
-
-
-#---
-
+serial.write("g0 x0 y0\n")
+print "g0 x0 y0"
+print serial.readlines(None)
 class Painting(QWidget):
 
     def __init__(self, *args):
@@ -74,24 +54,22 @@ class Painting(QWidget):
     def mouseMoveEvent(self, ev):
         endPoint = ev.pos()
         painter = QtGui.QPainter(self.image)
-        painter.setPen(QtGui.QPen(QtGui.QColor(20, 20, 20), 1, QtCore.Qt.SolidLine))
+        painter.setPen(QtGui.QPen(QtGui.QColor(20, 20, 20), 3, QtCore.Qt.SolidLine))
         painter.drawLine(self.currentPos, endPoint)
         self.modified = True
         self.update()
         self.currentPos=QPoint(endPoint)
         vx=self.currentPos.x()
         vy=self.currentPos.y()
-        print 'DEBUG> MOVE ' + 'G1','X'+str(vx)+'Y'+str(vy)
-        serial.write("DEBUG> MOVE G1 X"+str(vx)+"Y"+str(vy))
-        #bitBlt(self, 0, 0, self.buffer)
-
+        print 'G1 '+'X'+str(vx)+' Y'+str(vy)+' f10000'
+        serial.write("G1 X"+str(vx)+"Y"+str(vy)+' f10000'+"\n")
 
     def mousePressEvent(self, ev):
         self.currentPos=QPoint(ev.pos())
         vx=self.currentPos.x()
         vy=self.currentPos.y()
-        print 'DEBUG> PRESS' + 'G1','X'+str(vx),'Y'+str(vy)
-        #bitBlt(self, 0, 0, self.buffer)
+        print 'G1 '+'X'+str(vx)+' Y'+str(vy)+' f10000'
+        serial.write("G1 X"+str(vx)+"Y"+str(vy)+' f10000'+"\n")
 
     #def resizeEvent(self, ev):
         #tmp = QPixmap(self.buffer.size())
