@@ -18,7 +18,7 @@ import serial
 import time
 from time import sleep
 
-serial = serial.Serial("/dev/ttyUSB0", baudrate=115200, xonxoff=False, timeout=1)
+serial = serial.Serial("/dev/ttyUSB0", baudrate=115200, xonxoff=True, timeout=1)
 
 # check out this QT serial library http://qt-project.org/wiki/QtSerialPort
 # in leiu of serial port, redirect stdout  to file, then send file with comms program:
@@ -41,7 +41,7 @@ class Painting(QWidget):
 
     def __init__(self, *args):
         super(Painting, self).__init__()
-        imageSize = QtCore.QSize(500, 500)
+        imageSize = QtCore.QSize(300, 300)
         self.image = QtGui.QImage(imageSize, QtGui.QImage.Format_RGB32)
         self.lastPoint = QtCore.QPoint()
         self.currentPos = QPoint(0,0)
@@ -61,15 +61,15 @@ class Painting(QWidget):
         self.currentPos=QPoint(endPoint)
         vx=self.currentPos.x()
         vy=self.currentPos.y()
-        print 'G1 '+'X'+str(vx)+' Y'+str(vy)+' f10000'
-        serial.write("G1 X"+str(vx)+"Y"+str(vy)+' f10000'+"\n")
+        print 'G1 '+'X'+str(vx/25.0)+' Y'+str(vy/25.0)
+        serial.write("G1 X"+str(vx/25.0)+"Y"+str(vy/25.0) + "\n")
 
     def mousePressEvent(self, ev):
         self.currentPos=QPoint(ev.pos())
         vx=self.currentPos.x()
         vy=self.currentPos.y()
-        print 'G1 '+'X'+str(vx)+' Y'+str(vy)+' f10000'
-        serial.write("G1 X"+str(vx)+"Y"+str(vy)+' f10000'+"\n")
+        print 'G1 '+'X'+str(vx/25.0)+' Y'+str(vy/25.0)
+        serial.write("G1 X"+str(vx/25.0)+"Y"+str(vy/25.0)+"\n")
 
     #def resizeEvent(self, ev):
         #tmp = QPixmap(self.buffer.size())
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
 def main(args):
   app=QApplication(args)
   win=MainWindow()
-  win.setGeometry(0, 0, 320, 280)
+  win.setGeometry(0, 0, 300, 300)
   win.setWindowTitle('Pick N Place')
   win.show()
   app.connect(app, SIGNAL("lastWindowClosed()")
